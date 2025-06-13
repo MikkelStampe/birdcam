@@ -1,12 +1,13 @@
 #include "sensors.h"
-#include "driver/adc.h"
-#include "esp_adc_cal.h"
+#include "esp_adc/adc_oneshot.h"
+#include "esp_adc/adc_cali.h"
+#include "esp_adc/adc_cali_scheme.h"
 #include "esp_log.h"
 #include "dht.h"
 #include "camera.h"
 
 #define DHT_GPIO 13
-#define BATTERY_ADC_GPIO ADC1_CHANNEL_6
+#define BATTERY_ADC_GPIO ADC_CHANNEL_6
 
 static const char *TAG = "SENSORS";
 
@@ -26,12 +27,31 @@ bool read_dht_data(float* temperature, float* humidity) {
 }
 
 int read_battery_voltage() {
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(BATTERY_ADC_GPIO, ADC_ATTEN_DB_11);
-    esp_adc_cal_characteristics_t chars;
-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &chars);
-    int raw = adc1_get_raw(BATTERY_ADC_GPIO);
-    int mv = esp_adc_cal_raw_to_voltage(raw, &chars) * 2; // factor of 2 from voltage divider
+    // Create ADC handle
+    adc_oneshot_unit_handle_t adc_handle;
+    adc_oneshot_unit_init_cfg_t init_config = {
+        .unit_id = ADC_UNIT_1,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &adc_handle));
+
+    // Configure the channel
+    adc_oneshot_chan_cfg_t config = {
+        .bitwidth = ADC_BITWIDTH_12,
+        .atten = ADC_ATTEN_DB_12,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle, BATTERY_ADC_GPIO, &config));
+
+    // Read ADC value
+    int raw = 0;
+    ESP_ERROR_CHECK(adc_oneshot_read(adc_handle, BATTERY_ADC_GPIO, &raw));
+    
+    // Clean up
+    ESP_ERROR_CHECK(adc_oneshot_del_unit(adc_handle));
+    
+    // Convert to voltage (approximate - you may need calibration)
+    int mv = (raw * 3300) / 4095; // 3.3V reference, 12-bit ADC
+    mv = mv * 2; // factor of 2 from voltage divider
+    
     ESP_LOGI(TAG, "Battery Voltage: %dmV", mv);
     return mv;
 }
