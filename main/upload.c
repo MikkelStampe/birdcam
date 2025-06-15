@@ -14,7 +14,7 @@ void upload_image(const uint8_t* image_data, size_t image_size) {
     }
 
     esp_http_client_config_t config = {
-        .url = "http://your-server.local/upload",
+        .url = "http://192.168.1.124:8080/upload-bird",
         .method = HTTP_METHOD_POST,
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
@@ -65,7 +65,7 @@ void upload_sensor_data(const sensor_data_t* sensor_data) {
     ESP_LOGI(TAG, "Uploading sensor data: %s", json_buffer);
 
     esp_http_client_config_t config = {
-        .url = "http://your-server.local/sensor-data",
+        .url = "http://192.168.1.124:8080/sensor-data",
         .method = HTTP_METHOD_POST,
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
