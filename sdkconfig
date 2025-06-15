@@ -407,6 +407,13 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
+# Wi-Fi Configuration
+#
+CONFIG_WIFI_SSID="myssid"
+CONFIG_WIFI_PASS="mypassword"
+# end of Wi-Fi Configuration
+
+#
 # Compiler options
 #
 CONFIG_COMPILER_OPTIMIZATION_DEBUG=y

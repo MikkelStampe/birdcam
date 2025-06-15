@@ -8,5 +8,20 @@
         "IDF_TARGET": "esp32"
     },
     "idf.flashType": "UART",
-    "idf.port": "/dev/tty.usbserial-1410"
+    "idf.port": "/dev/tty.usbserial-1410",
+    "C_Cpp.default.configurationProvider": "espressif.esp-idf-extension",
+    "files.associations": {
+        "esp_timer.h": "c",
+        "freertos.h": "c",
+        "esp_http_client.h": "c",
+        "esp_wifi.h": "c",
+        "esp_log.h": "c",
+        "wifi.h": "c",
+        "wifi_manager.h": "c",
+        "nvs_flash.h": "c"
+    },
+    "files.exclude": {
+    "**/.vscode/ipch": true
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

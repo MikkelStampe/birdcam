@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "sensors.h"
 #include "upload.h"
+#include "wifi_manager.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -16,6 +17,14 @@
 void app_main(void) {
     ESP_LOGI(TAG, "Waking from deep sleep...");
 
+    wifi_manager_init();
+
+    while (!wifi_manager_is_connected()) {
+        vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+
+    ESP_LOGI(TAG, "Wi-Fi init called, starting camera...");
+
     // Initialize camera
     init_camera();
     
@@ -23,7 +32,7 @@ void app_main(void) {
     camera_fb_t* image = capture_camera_sensor();
     if (image) {
         // Upload the captured image
-        // upload_image(image->buf, image->len);
+        upload_image(image->buf, image->len);
         // Release the image buffer
         release_camera_sensor(image);
     } else {
@@ -45,7 +54,7 @@ void app_main(void) {
 
     for (int i = 30; i >= 0; i--) {
         ESP_LOGI(TAG, "Restarting in %d seconds...\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
     ESP_LOGI(TAG, "Restarting now.\n");
